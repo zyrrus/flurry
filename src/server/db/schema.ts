@@ -16,7 +16,7 @@ import {
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const mysqlTable = mysqlTableCreator((name) => `tempex_${name}`);
+export const mysqlTable = mysqlTableCreator((name) => `flurry_${name}`);
 
 export const posts = mysqlTable(
   "post",
