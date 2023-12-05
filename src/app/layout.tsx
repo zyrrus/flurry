@@ -35,7 +35,7 @@ export default function RootLayout({
         <body className={`font-sans ${inter.variable} px-4`}>
           <TRPCReactProvider cookies={cookies().toString()}>
             <nav className="mb-8">
-              <ul className="flex flex-row flex-wrap gap-x-6 gap-y-1">
+              <ul className="flex flex-row flex-wrap items-center gap-x-6 gap-y-1">
                 <li className="">
                   <a className="hover:underline" href="/">
                     Flurry Homepage
