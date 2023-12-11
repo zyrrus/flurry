@@ -16,7 +16,7 @@ export const mysqlTable = mysqlTableCreator((name) => `flurry_${name}`);
 
 export const user = mysqlTable("user", {
   userId: varchar("userId", { length: 255 }).unique().primaryKey(),
-  activeLanguageId: bigint("activeLanguageId", { mode: "bigint" }).notNull(),
+  activeLanguageId: bigint("activeLanguageId", { mode: "bigint" }),
   // .references(() => language.languageId),
 });
 
