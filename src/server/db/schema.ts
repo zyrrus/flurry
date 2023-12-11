@@ -1,34 +1,80 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
-import { sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
-  bigint,
-  index,
   mysqlTableCreator,
-  timestamp,
+  text,
   varchar,
+  serial,
+  int,
+  bigint,
 } from "drizzle-orm/mysql-core";
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
 export const mysqlTable = mysqlTableCreator((name) => `flurry_${name}`);
 
-export const posts = mysqlTable(
-  "post",
-  {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    name: varchar("name", { length: 256 }),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
-  },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
+// Foreign keys: https://planetscale.com/blog/working-with-related-data-using-drizzle-and-planetscale
+
+// === Tables =========================================================
+
+export const user = mysqlTable("user", {
+  userId: varchar("userId", { length: 255 }).unique().primaryKey(),
+  activeLanguageId: bigint("activeLanguageId", { mode: "bigint" }).notNull(),
+  // .references(() => language.languageId),
+});
+
+export const language = mysqlTable("language", {
+  languageId: serial("languageId").primaryKey(),
+  name: varchar("name", { length: 255 }),
+  abbreviation: varchar("abbreviation", { length: 2 }),
+});
+
+export const course = mysqlTable("course", {
+  courseId: serial("courseId").primaryKey(),
+  languageId: bigint("languageId", { mode: "bigint" }).notNull(),
+  // .references(() => language.languageId),
+  name: varchar("name", { length: 255 }),
+  description: text("description"),
+});
+
+export const progress = mysqlTable("progress", {
+  // Probably need to explicitly make a composite key
+  userId: varchar("userId", { length: 255 }),
+  //   .references(() => user.userId),
+  languageId: bigint("languageId", { mode: "bigint" }).notNull(),
+  // .references(() => language.languageId),
+  interactions: int("interactions"),
+  successes: int("successes"),
+});
+
+export const content = mysqlTable("content", {
+  contentId: serial("contentId").primaryKey(),
+  courseId: bigint("courseId", { mode: "bigint" }).notNull(),
+  // .references(() => course.courseId),
+  content: text("content"),
+});
+
+// === Relations =========================================================
+
+export const userRelations = relations(user, ({ one }) => ({
+  language: one(language, {
+    fields: [user.activeLanguageId],
+    references: [language.languageId],
   }),
-);
+}));
+
+export const courseRelations = relations(course, ({ one }) => ({
+  language: one(language, {
+    fields: [course.languageId],
+    references: [language.languageId],
+  }),
+}));
+
+export const progressRelations = relations(progress, ({ many }) => ({
+  language: many(language),
+  user: many(user),
+}));
+
+export const contentRelations = relations(content, ({ one }) => ({
+  course: one(course, {
+    fields: [content.courseId],
+    references: [course.courseId],
+  }),
+}));

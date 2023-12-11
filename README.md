@@ -10,10 +10,8 @@ Built with [`create-t3-app`](https://create.t3.gg/).
 
 ### Backend
 
-- Create a Profile model that includes
-  - clerkId
-  - currentCourse
-  - courseHistory
+- Database modelling
+- Lightweight CMS
 
 ### Frontend
 
