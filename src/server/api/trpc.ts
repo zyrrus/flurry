@@ -10,6 +10,7 @@ import { ZodError } from "zod";
 import superjson from "superjson";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type Context } from "~/server/api/context";
+import { auth } from "@clerk/nextjs/server";
 
 /**
  * 1. CONTEXT
@@ -49,12 +50,16 @@ const t = initTRPC.context<Context>().create({
 
 // check if the user is signed in, otherwise throw a UNAUTHORIZED CODE
 const enforceUserIsAuthed = t.middleware(({ next, ctx }) => {
-  if (!ctx.auth?.userId) {
+  const userAuth = auth();
+
+  if (!userAuth.userId) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return next({
     ctx: {
-      auth: ctx.auth,
+      ...ctx,
+      auth: userAuth,
     },
   });
 });

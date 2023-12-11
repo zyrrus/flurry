@@ -24,6 +24,7 @@ export const language = mysqlTable("language", {
   languageId: serial("languageId").primaryKey(),
   name: varchar("name", { length: 255 }),
   abbreviation: varchar("abbreviation", { length: 2 }),
+  emoji: varchar("emoji", { length: 2 }),
 });
 
 export const course = mysqlTable("course", {
@@ -67,9 +68,15 @@ export const courseRelations = relations(course, ({ one }) => ({
   }),
 }));
 
-export const progressRelations = relations(progress, ({ many }) => ({
-  language: many(language),
-  user: many(user),
+export const progressRelations = relations(progress, ({ one }) => ({
+  language: one(language, {
+    fields: [progress.languageId],
+    references: [language.languageId],
+  }),
+  user: one(user, {
+    fields: [progress.userId],
+    references: [user.userId],
+  }),
 }));
 
 export const contentRelations = relations(content, ({ one }) => ({
