@@ -4,6 +4,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { users } from "~/server/db/schema";
+import { lessons } from "~/server/db/schema";
 
-export const userRouter = createTRPCRouter({});
+export const lessonRouter = createTRPCRouter({});

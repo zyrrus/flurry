@@ -1,5 +1,8 @@
-import { languageRouter } from "~/server/api/routers/language";
 import { userRouter } from "~/server/api/routers/user";
+import { courseRouter } from "~/server/api/routers/course";
+import { lessonRouter } from "~/server/api/routers/lesson";
+import { topicRouter } from "~/server/api/routers/topic";
+import { exerciseRouter } from "~/server/api/routers/exercise";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -9,7 +12,10 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   user: userRouter,
-  language: languageRouter,
+  course: courseRouter,
+  lesson: lessonRouter,
+  topic: topicRouter,
+  exercise: exerciseRouter,
 });
 
 // export type definition of API
