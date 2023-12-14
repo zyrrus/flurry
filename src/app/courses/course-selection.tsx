@@ -1,24 +1,26 @@
 "use client";
 
 import { type InferSelectModel } from "drizzle-orm";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { type language } from "~/server/db/schema";
+import { type courses } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 
 interface FormInputs {
-  languageId: bigint;
+  courseId: number;
 }
 
 interface Props {
-  courses: InferSelectModel<typeof language>[];
-  activeLanguage?: bigint;
+  courses: InferSelectModel<typeof courses>[];
+  activeCourseId?: number;
 }
 
-export default function CourseSelection({ courses, activeLanguage }: Props) {
-  const { mutate, error } = api.language.setActiveLanguage.useMutation({
+export default function CourseSelection({ courses, activeCourseId }: Props) {
+  const router = useRouter();
+
+  const { mutate, error } = api.user.updateActiveCourse.useMutation({
     onSuccess: () => {
-      redirect("/home");
+      router.push("/home");
     },
   });
 
@@ -27,29 +29,39 @@ export default function CourseSelection({ courses, activeLanguage }: Props) {
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<FormInputs>({ defaultValues: { languageId: activeLanguage } });
+  } = useForm<FormInputs>({
+    defaultValues: {
+      courseId: courses.some(({ courseId }) => courseId === activeCourseId)
+        ? activeCourseId
+        : undefined,
+    },
+  });
 
   const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    if (data.languageId) {
-      mutate({ languageId: BigInt(data.languageId) });
+    if (data.courseId) {
+      mutate({ courseId: data.courseId });
     } else {
-      setError("languageId", { message: "You must select a valid language." });
+      setError("courseId", { message: "You must select a valid course." });
     }
   };
 
   return (
     <form className="flex flex-col gap-y-2" onSubmit={handleSubmit(onSubmit)}>
       <label htmlFor="course-select">Select a language:</label>
-      <select id="course-select" className="border" {...register("languageId")}>
+      <select
+        id="course-select"
+        className="border"
+        {...register("courseId", { valueAsNumber: true })}
+      >
         <option value="">Select...</option>
-        {courses.map(({ name, emoji, languageId }) => (
-          <option value={languageId}>
+        {courses.map(({ name, emoji, courseId }) => (
+          <option key={courseId} value={courseId}>
             {name} {emoji}
           </option>
         ))}
       </select>
-      {errors.languageId && (
-        <p className="text-sm text-red-500">{errors.languageId.message}</p>
+      {errors.courseId && (
+        <p className="text-sm text-red-500">{errors.courseId.message}</p>
       )}
       <button type="submit" className="border">
         Submit
@@ -57,7 +69,7 @@ export default function CourseSelection({ courses, activeLanguage }: Props) {
       {errors.root && (
         <p className="text-sm text-red-500">{errors.root.message}</p>
       )}
-      {error && <p className="text-sm text-red-500">{error.message}</p>}
+      {error && <pre className="text-sm text-red-500">{error.message}</pre>}
     </form>
   );
 }
