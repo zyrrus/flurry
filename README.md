@@ -15,33 +15,3 @@ Built with [`create-t3-app`](https://create.t3.gg/).
 3. Copy the link from that command
 4. Go to Clerk Dashboard > Webhooks > [end point]
 5. Edit the endpoint URL to use the copied link + `/api/webhooks/your-route-name`
-
-## TODO:
-
-### Backend
-
-- Database modelling
-- Lightweight CMS
-
-### Frontend
-
-- Landing page:
-
-- Home:
-
-- Courses:
-
-  - language select page + currently selected language as part of the current user data
-
-- Lesson:
-
-- Practice:
-
-- Profile:
-
-- Settings:
-
-## Maybe
-
-- https://github.com/ploskovytskyy/next-app-router-trpc-drizzle-planetscale-edge/blob/main/src/middleware.ts#L2
-- https://clerk.com/docs/components/customization/overview#use-tailwind-classes-to-style-clerk-components

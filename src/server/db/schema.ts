@@ -4,84 +4,125 @@ import {
   text,
   varchar,
   serial,
-  int,
   bigint,
+  json,
+  primaryKey,
 } from "drizzle-orm/mysql-core";
 
 export const mysqlTable = mysqlTableCreator((name) => `flurry_${name}`);
 
-// Foreign keys: https://planetscale.com/blog/working-with-related-data-using-drizzle-and-planetscale
-
 // === Tables =========================================================
 
 export const user = mysqlTable("user", {
-  userId: varchar("userId", { length: 255 }).unique().primaryKey(),
-  activeLanguageId: bigint("activeLanguageId", { mode: "bigint" }),
-  // .references(() => language.languageId),
-});
-
-export const language = mysqlTable("language", {
-  languageId: serial("languageId").primaryKey(),
-  name: varchar("name", { length: 255 }),
-  abbreviation: varchar("abbreviation", { length: 2 }),
-  emoji: varchar("emoji", { length: 2 }),
+  userId: varchar("user_id", { length: 255 }).unique().primaryKey(),
+  activeCourseId: bigint("active_course_id", { mode: "number" }),
 });
 
 export const course = mysqlTable("course", {
-  courseId: serial("courseId").primaryKey(),
-  languageId: bigint("languageId", { mode: "bigint" }).notNull(),
-  // .references(() => language.languageId),
+  courseId: serial("course_id").primaryKey(),
   name: varchar("name", { length: 255 }),
   description: text("description"),
+  abbreviation: varchar("abbreviation", { length: 8 }),
+  emoji: varchar("emoji", { length: 8 }),
+  guide: json("guide"),
 });
 
-export const progress = mysqlTable("progress", {
-  // Probably need to explicitly make a composite key
-  userId: varchar("userId", { length: 255 }),
-  //   .references(() => user.userId),
-  languageId: bigint("languageId", { mode: "bigint" }).notNull(),
-  // .references(() => language.languageId),
-  interactions: int("interactions"),
-  successes: int("successes"),
+export const lesson = mysqlTable("lesson", {
+  lessonId: serial("lesson_id").primaryKey(),
+  courseId: bigint("course_id", { mode: "number" }).notNull(),
+  name: varchar("name", { length: 255 }),
+  description: text("description"),
+  guide: json("guide"),
 });
 
-export const content = mysqlTable("content", {
-  contentId: serial("contentId").primaryKey(),
-  courseId: bigint("courseId", { mode: "bigint" }).notNull(),
-  // .references(() => course.courseId),
-  content: text("content"),
+export const topic = mysqlTable("topic", {
+  topicId: serial("topic_id").primaryKey(),
+  name: varchar("name", { length: 255 }),
+  description: text("description"),
+  guide: json("guide"),
 });
+
+export const exercise = mysqlTable("exercise", {
+  exerciseId: serial("exercise_id").primaryKey(),
+  name: varchar("name", { length: 255 }),
+  targetText: varchar("target_text", { length: 255 }),
+  nativeText: varchar("native_text", { length: 255 }),
+  image: varchar("image", { length: 255 }),
+  targetGrammar: json("target_grammar"),
+  nativeGrammar: json("native_grammar"),
+});
+
+// === Junctions =========================================================
+
+export const lessonToTopic = mysqlTable(
+  "lesson_to_topic",
+  {
+    lessonId: bigint("lesson_id", { mode: "number" }).notNull(),
+    topicId: bigint("topic_id", { mode: "number" }).notNull(),
+  },
+  (t) => ({ pk: primaryKey(t.topicId, t.lessonId) }),
+);
+
+export const topicToExercise = mysqlTable(
+  "topic_to_exercise",
+  {
+    topicId: bigint("topic_id", { mode: "number" }).notNull(),
+    exerciseId: bigint("exercise_id", { mode: "number" }).notNull(),
+  },
+  (t) => ({ pk: primaryKey(t.topicId, t.exerciseId) }),
+);
 
 // === Relations =========================================================
 
 export const userRelations = relations(user, ({ one }) => ({
-  language: one(language, {
-    fields: [user.activeLanguageId],
-    references: [language.languageId],
-  }),
-}));
-
-export const courseRelations = relations(course, ({ one }) => ({
-  language: one(language, {
-    fields: [course.languageId],
-    references: [language.languageId],
-  }),
-}));
-
-export const progressRelations = relations(progress, ({ one }) => ({
-  language: one(language, {
-    fields: [progress.languageId],
-    references: [language.languageId],
-  }),
-  user: one(user, {
-    fields: [progress.userId],
-    references: [user.userId],
-  }),
-}));
-
-export const contentRelations = relations(content, ({ one }) => ({
-  course: one(course, {
-    fields: [content.courseId],
+  activeCourse: one(course, {
+    fields: [user.activeCourseId],
     references: [course.courseId],
   }),
 }));
+
+export const courseRelations = relations(course, ({ many }) => ({
+  lessons: many(lesson),
+}));
+
+export const lessonRelations = relations(lesson, ({ one, many }) => ({
+  course: one(course, {
+    fields: [lesson.courseId],
+    references: [course.courseId],
+  }),
+  topics: many(lessonToTopic),
+}));
+
+export const topicRelations = relations(topic, ({ many }) => ({
+  lessons: many(lessonToTopic),
+  exercises: many(topicToExercise),
+}));
+
+export const lessonToTopicRelations = relations(lessonToTopic, ({ one }) => ({
+  lesson: one(lesson, {
+    fields: [lessonToTopic.lessonId],
+    references: [lesson.lessonId],
+  }),
+  topic: one(topic, {
+    fields: [lessonToTopic.topicId],
+    references: [topic.topicId],
+  }),
+}));
+
+export const exerciseRelations = relations(exercise, ({ many }) => ({
+  topics: many(topicToExercise),
+}));
+
+export const topicToExerciseRelations = relations(
+  topicToExercise,
+  ({ one }) => ({
+    topic: one(topic, {
+      fields: [topicToExercise.topicId],
+      references: [topic.topicId],
+    }),
+    exercise: one(exercise, {
+      fields: [topicToExercise.exerciseId],
+      references: [exercise.exerciseId],
+    }),
+  }),
+);
