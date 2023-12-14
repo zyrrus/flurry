@@ -13,12 +13,12 @@ export const mysqlTable = mysqlTableCreator((name) => `flurry_${name}`);
 
 // === Tables =========================================================
 
-export const user = mysqlTable("user", {
+export const users = mysqlTable("user", {
   userId: varchar("user_id", { length: 255 }).unique().primaryKey(),
   activeCourseId: bigint("active_course_id", { mode: "number" }),
 });
 
-export const course = mysqlTable("course", {
+export const courses = mysqlTable("course", {
   courseId: serial("course_id").primaryKey(),
   name: varchar("name", { length: 255 }),
   description: text("description"),
@@ -27,7 +27,7 @@ export const course = mysqlTable("course", {
   guide: json("guide"),
 });
 
-export const lesson = mysqlTable("lesson", {
+export const lessons = mysqlTable("lesson", {
   lessonId: serial("lesson_id").primaryKey(),
   courseId: bigint("course_id", { mode: "number" }).notNull(),
   name: varchar("name", { length: 255 }),
@@ -35,14 +35,14 @@ export const lesson = mysqlTable("lesson", {
   guide: json("guide"),
 });
 
-export const topic = mysqlTable("topic", {
+export const topics = mysqlTable("topic", {
   topicId: serial("topic_id").primaryKey(),
   name: varchar("name", { length: 255 }),
   description: text("description"),
   guide: json("guide"),
 });
 
-export const exercise = mysqlTable("exercise", {
+export const exercises = mysqlTable("exercise", {
   exerciseId: serial("exercise_id").primaryKey(),
   name: varchar("name", { length: 255 }),
   targetText: varchar("target_text", { length: 255 }),
@@ -74,55 +74,55 @@ export const topicToExercise = mysqlTable(
 
 // === Relations =========================================================
 
-export const userRelations = relations(user, ({ one }) => ({
-  activeCourse: one(course, {
-    fields: [user.activeCourseId],
-    references: [course.courseId],
+export const userRelations = relations(users, ({ one }) => ({
+  activeCourse: one(courses, {
+    fields: [users.activeCourseId],
+    references: [courses.courseId],
   }),
 }));
 
-export const courseRelations = relations(course, ({ many }) => ({
-  lessons: many(lesson),
+export const courseRelations = relations(courses, ({ many }) => ({
+  lessons: many(lessons),
 }));
 
-export const lessonRelations = relations(lesson, ({ one, many }) => ({
-  course: one(course, {
-    fields: [lesson.courseId],
-    references: [course.courseId],
+export const lessonRelations = relations(lessons, ({ one, many }) => ({
+  course: one(courses, {
+    fields: [lessons.courseId],
+    references: [courses.courseId],
   }),
   topics: many(lessonToTopic),
 }));
 
-export const topicRelations = relations(topic, ({ many }) => ({
+export const topicRelations = relations(topics, ({ many }) => ({
   lessons: many(lessonToTopic),
   exercises: many(topicToExercise),
 }));
 
 export const lessonToTopicRelations = relations(lessonToTopic, ({ one }) => ({
-  lesson: one(lesson, {
+  lesson: one(lessons, {
     fields: [lessonToTopic.lessonId],
-    references: [lesson.lessonId],
+    references: [lessons.lessonId],
   }),
-  topic: one(topic, {
+  topic: one(topics, {
     fields: [lessonToTopic.topicId],
-    references: [topic.topicId],
+    references: [topics.topicId],
   }),
 }));
 
-export const exerciseRelations = relations(exercise, ({ many }) => ({
+export const exerciseRelations = relations(exercises, ({ many }) => ({
   topics: many(topicToExercise),
 }));
 
 export const topicToExerciseRelations = relations(
   topicToExercise,
   ({ one }) => ({
-    topic: one(topic, {
+    topic: one(topics, {
       fields: [topicToExercise.topicId],
-      references: [topic.topicId],
+      references: [topics.topicId],
     }),
-    exercise: one(exercise, {
+    exercise: one(exercises, {
       fields: [topicToExercise.exerciseId],
-      references: [exercise.exerciseId],
+      references: [exercises.exerciseId],
     }),
   }),
 );

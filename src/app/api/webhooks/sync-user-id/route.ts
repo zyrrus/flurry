@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { user } from "~/server/db/schema";
+import { users } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 }
 
 async function createUser(id: string): Promise<Response> {
-  const { rowsAffected } = await db.insert(user).values({ userId: id });
+  const { rowsAffected } = await db.insert(users).values({ userId: id });
 
   if (rowsAffected === 1) {
     return new Response("Successfully created new user", { status: 200 });
@@ -89,7 +89,7 @@ async function createUser(id: string): Promise<Response> {
 }
 
 async function deleteUser(id: string): Promise<Response> {
-  const { rowsAffected } = await db.delete(user).where(eq(user.userId, id));
+  const { rowsAffected } = await db.delete(users).where(eq(users.userId, id));
 
   if (rowsAffected === 1) {
     return new Response("Successfully deleted user", { status: 200 });
