@@ -5,7 +5,9 @@ import { courses } from "~/server/db/schema";
 
 export const courseRouter = createTRPCRouter({
   getAllCourses: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.courses.findMany();
+    return await ctx.db.query.courses.findMany({
+      orderBy: (course, { asc }) => [asc(course.name)],
+    });
   }),
   getCourse: protectedProcedure
     .input(
