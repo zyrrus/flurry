@@ -7,6 +7,8 @@ import {
   bigint,
   json,
   primaryKey,
+  timestamp,
+  boolean,
 } from "drizzle-orm/mysql-core";
 
 export const mysqlTable = mysqlTableCreator((name) => `flurry_${name}`);
@@ -17,6 +19,8 @@ export const users = mysqlTable("user", {
   userId: varchar("user_id", { length: 255 }).unique().primaryKey(),
   activeCourseId: bigint("active_course_id", { mode: "number" }),
 });
+
+// === Content Storage ===================================================
 
 export const courses = mysqlTable("course", {
   courseId: serial("course_id").primaryKey(),
@@ -52,6 +56,19 @@ export const exercises = mysqlTable("exercise", {
   nativeGrammar: json("native_grammar"),
 });
 
+// === Progress ==========================================================
+
+export const courseHistory = mysqlTable("course_history", {
+  courseHistoryId: serial("course_history_id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }),
+  courseId: bigint("course_id", { mode: "number" }).notNull(),
+  lessonId: bigint("lesson_id", { mode: "number" }).notNull(),
+  topicId: bigint("topic_id", { mode: "number" }).notNull(),
+  exerciseId: bigint("exercise_id", { mode: "number" }).notNull(),
+  completionTime: timestamp("completion_time", { mode: "date" }),
+  isCorrect: boolean("is_correct"),
+});
+
 // === Junctions =========================================================
 
 export const lessonToTopic = mysqlTable(
@@ -74,15 +91,17 @@ export const topicToExercise = mysqlTable(
 
 // === Relations =========================================================
 
-export const userRelations = relations(users, ({ one }) => ({
+export const userRelations = relations(users, ({ one, many }) => ({
   activeCourse: one(courses, {
     fields: [users.activeCourseId],
     references: [courses.courseId],
   }),
+  courseHistory: many(courseHistory),
 }));
 
 export const courseRelations = relations(courses, ({ many }) => ({
   lessons: many(lessons),
+  courseHistory: many(courseHistory),
 }));
 
 export const lessonRelations = relations(lessons, ({ one, many }) => ({
@@ -91,11 +110,18 @@ export const lessonRelations = relations(lessons, ({ one, many }) => ({
     references: [courses.courseId],
   }),
   topics: many(lessonToTopic),
+  courseHistory: many(courseHistory),
 }));
 
 export const topicRelations = relations(topics, ({ many }) => ({
   lessons: many(lessonToTopic),
   exercises: many(topicToExercise),
+  courseHistory: many(courseHistory),
+}));
+
+export const exerciseRelations = relations(exercises, ({ many }) => ({
+  topics: many(topicToExercise),
+  courseHistory: many(courseHistory),
 }));
 
 export const lessonToTopicRelations = relations(lessonToTopic, ({ one }) => ({
@@ -107,10 +133,6 @@ export const lessonToTopicRelations = relations(lessonToTopic, ({ one }) => ({
     fields: [lessonToTopic.topicId],
     references: [topics.topicId],
   }),
-}));
-
-export const exerciseRelations = relations(exercises, ({ many }) => ({
-  topics: many(topicToExercise),
 }));
 
 export const topicToExerciseRelations = relations(
@@ -126,3 +148,26 @@ export const topicToExerciseRelations = relations(
     }),
   }),
 );
+
+export const courseHistoryRelations = relations(courseHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [courseHistory.userId],
+    references: [users.userId],
+  }),
+  course: one(courses, {
+    fields: [courseHistory.courseId],
+    references: [courses.courseId],
+  }),
+  lesson: one(lessons, {
+    fields: [courseHistory.lessonId],
+    references: [lessons.lessonId],
+  }),
+  topic: one(topics, {
+    fields: [courseHistory.topicId],
+    references: [topics.topicId],
+  }),
+  exercise: one(exercises, {
+    fields: [courseHistory.exerciseId],
+    references: [exercises.exerciseId],
+  }),
+}));
