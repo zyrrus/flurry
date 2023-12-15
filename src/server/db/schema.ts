@@ -9,6 +9,7 @@ import {
   primaryKey,
   timestamp,
   boolean,
+  mysqlEnum,
 } from "drizzle-orm/mysql-core";
 
 export const mysqlTable = mysqlTableCreator((name) => `flurry_${name}`);
@@ -48,7 +49,7 @@ export const topics = mysqlTable("topic", {
 
 export const exercises = mysqlTable("exercise", {
   exerciseId: serial("exercise_id").primaryKey(),
-  name: varchar("name", { length: 255 }),
+  variant: mysqlEnum("variant", ["sentence", "phrase", "characters"]),
   targetText: varchar("target_text", { length: 255 }),
   nativeText: varchar("native_text", { length: 255 }),
   image: varchar("image", { length: 255 }),
