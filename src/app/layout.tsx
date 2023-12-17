@@ -12,6 +12,7 @@ import {
   SignedOut,
 } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
+import ClientProviders from "~/app/client-providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,6 +25,8 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
+const routes = ["Home", "Courses", "Practice", "Profile", "Settings"];
+
 export default function RootLayout({
   children,
 }: {
@@ -34,54 +37,41 @@ export default function RootLayout({
       <html lang="en">
         <body className={`font-sans ${inter.variable} px-4`}>
           <TRPCReactProvider cookies={cookies().toString()}>
-            <nav className="mb-8">
-              <ul className="flex flex-row flex-wrap items-center gap-x-6 gap-y-1">
-                <li className="">
-                  <a className="hover:underline" href="/">
-                    Flurry Homepage
-                  </a>
-                </li>
-                <li className="">
-                  <a className="hover:underline" href="/home">
-                    Home
-                  </a>
-                </li>
-                <li className="">
-                  <a className="hover:underline" href="/courses">
-                    Courses
-                  </a>
-                </li>
-                <li className="">
-                  <a className="hover:underline" href="/practice">
-                    Practice
-                  </a>
-                </li>
-                <li className="">
-                  <a className="hover:underline" href="/profile">
-                    Profile
-                  </a>
-                </li>
-                <li className="">
-                  <a className="hover:underline" href="/settings">
-                    Settings
-                  </a>
-                </li>
-                <SignedIn>
-                  <li>
-                    <UserButton showName />
+            <ClientProviders>
+              <nav className="mb-8">
+                <ul className="flex flex-row flex-wrap items-center gap-x-6 gap-y-1">
+                  <li className="">
+                    <a className="hover:underline" href="/">
+                      Flurry Homepage
+                    </a>
                   </li>
-                </SignedIn>
-                <SignedOut>
-                  <li>
-                    <SignInButton />
-                  </li>
-                  <li>
-                    <SignUpButton />
-                  </li>
-                </SignedOut>
-              </ul>
-            </nav>
-            {children}
+                  {routes.map((route) => (
+                    <li>
+                      <a
+                        className="hover:underline"
+                        href={`/${route.toLowerCase()}`}
+                      >
+                        {route}
+                      </a>
+                    </li>
+                  ))}
+                  <SignedIn>
+                    <li>
+                      <UserButton showName />
+                    </li>
+                  </SignedIn>
+                  <SignedOut>
+                    <li>
+                      <SignInButton />
+                    </li>
+                    <li>
+                      <SignUpButton />
+                    </li>
+                  </SignedOut>
+                </ul>
+              </nav>
+              {children}
+            </ClientProviders>
           </TRPCReactProvider>
         </body>
       </html>
