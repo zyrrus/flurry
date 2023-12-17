@@ -13,14 +13,14 @@ export const courseRouter = createTRPCRouter({
     .input(
       z.object({
         courseId: z.number(),
-        includeLessons: z.boolean().optional().default(false),
+        includeTopics: z.boolean().optional().default(false),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const lessons = input.includeLessons ? true : undefined;
+      const topics = input.includeTopics ? true : undefined;
       return await ctx.db.query.courses.findFirst({
         where: eq(courses.courseId, input.courseId),
-        with: { lessons },
+        with: { topics },
       });
     }),
 });

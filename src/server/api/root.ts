@@ -13,8 +13,8 @@ import { createTRPCRouter } from "~/server/api/trpc";
 export const appRouter = createTRPCRouter({
   user: userRouter,
   course: courseRouter,
-  lesson: lessonRouter,
   topic: topicRouter,
+  lesson: lessonRouter,
   exercise: exerciseRouter,
 });
 

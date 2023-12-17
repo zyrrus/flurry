@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { exercises, topicToExercise } from "~/server/db/schema";
+import { exercises, lessonToExercise } from "~/server/db/schema";
 
 export const exerciseRouter = createTRPCRouter({
-  getAllTopicExercises: protectedProcedure
-    .input(z.object({ topicId: z.number() }))
+  getAllLessonExercises: protectedProcedure
+    .input(z.object({ lessonId: z.number() }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.topicToExercise.findMany({
-        where: eq(topicToExercise.topicId, input.topicId),
+      return await ctx.db.query.lessonToExercise.findMany({
+        where: eq(lessonToExercise.lessonId, input.lessonId),
         with: { exercise: true },
       });
     }),

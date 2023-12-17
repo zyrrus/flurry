@@ -1,28 +1,29 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { lessons } from "~/server/db/schema";
+import { lessons, topicToLesson } from "~/server/db/schema";
 
 export const lessonRouter = createTRPCRouter({
-  getAllCourseLessons: protectedProcedure
-    .input(z.object({ courseId: z.number() }))
+  getAllTopicLessons: protectedProcedure
+    .input(z.object({ topicId: z.number() }))
     .query(async ({ ctx, input }) => {
-      return await ctx.db.query.lessons.findMany({
-        where: eq(lessons.courseId, input.courseId),
+      return await ctx.db.query.topicToLesson.findMany({
+        where: eq(topicToLesson.topicId, input.topicId),
+        with: { lesson: true },
       });
     }),
   getLesson: protectedProcedure
     .input(
       z.object({
         lessonId: z.number(),
-        includeTopics: z.boolean().optional().default(false),
+        includeExercises: z.boolean().optional().default(false),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const topics = input.includeTopics ? true : undefined;
+      const exercises = input.includeExercises ? true : undefined;
       return await ctx.db.query.lessons.findFirst({
         where: eq(lessons.lessonId, input.lessonId),
-        with: { topics },
+        with: { exercises },
       });
     }),
 });

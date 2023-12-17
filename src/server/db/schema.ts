@@ -32,16 +32,16 @@ export const courses = mysqlTable("course", {
   guide: json("guide"),
 });
 
-export const lessons = mysqlTable("lesson", {
-  lessonId: serial("lesson_id").primaryKey(),
+export const topics = mysqlTable("topic", {
+  topicId: serial("topic_id").primaryKey(),
   courseId: bigint("course_id", { mode: "number" }).notNull(),
   name: varchar("name", { length: 255 }),
   description: text("description"),
   guide: json("guide"),
 });
 
-export const topics = mysqlTable("topic", {
-  topicId: serial("topic_id").primaryKey(),
+export const lessons = mysqlTable("lesson", {
+  lessonId: serial("lesson_id").primaryKey(),
   name: varchar("name", { length: 255 }),
   description: text("description"),
   guide: json("guide"),
@@ -63,8 +63,8 @@ export const courseHistory = mysqlTable("course_history", {
   courseHistoryId: serial("course_history_id").primaryKey(),
   userId: varchar("user_id", { length: 255 }),
   courseId: bigint("course_id", { mode: "number" }).notNull(),
-  lessonId: bigint("lesson_id", { mode: "number" }).notNull(),
   topicId: bigint("topic_id", { mode: "number" }).notNull(),
+  lessonId: bigint("lesson_id", { mode: "number" }).notNull(),
   exerciseId: bigint("exercise_id", { mode: "number" }).notNull(),
   completionTime: timestamp("completion_time", { mode: "date" }),
   isCorrect: boolean("is_correct"),
@@ -72,22 +72,22 @@ export const courseHistory = mysqlTable("course_history", {
 
 // === Junctions =========================================================
 
-export const lessonToTopic = mysqlTable(
-  "lesson_to_topic",
+export const topicToLesson = mysqlTable(
+  "topic_to_lesson",
   {
-    lessonId: bigint("lesson_id", { mode: "number" }).notNull(),
     topicId: bigint("topic_id", { mode: "number" }).notNull(),
+    lessonId: bigint("lesson_id", { mode: "number" }).notNull(),
   },
   (t) => ({ pk: primaryKey(t.topicId, t.lessonId) }),
 );
 
-export const topicToExercise = mysqlTable(
-  "topic_to_exercise",
+export const lessonToExercise = mysqlTable(
+  "lesson_to_exercise",
   {
-    topicId: bigint("topic_id", { mode: "number" }).notNull(),
+    lessonId: bigint("lesson_id", { mode: "number" }).notNull(),
     exerciseId: bigint("exercise_id", { mode: "number" }).notNull(),
   },
-  (t) => ({ pk: primaryKey(t.topicId, t.exerciseId) }),
+  (t) => ({ pk: primaryKey(t.lessonId, t.exerciseId) }),
 );
 
 // === Relations =========================================================
@@ -101,50 +101,50 @@ export const userRelations = relations(users, ({ one, many }) => ({
 }));
 
 export const courseRelations = relations(courses, ({ many }) => ({
-  lessons: many(lessons),
+  topics: many(topics),
   courseHistory: many(courseHistory),
 }));
 
-export const lessonRelations = relations(lessons, ({ one, many }) => ({
+export const topicRelations = relations(topics, ({ one, many }) => ({
   course: one(courses, {
-    fields: [lessons.courseId],
+    fields: [topics.courseId],
     references: [courses.courseId],
   }),
-  topics: many(lessonToTopic),
+  lessons: many(topicToLesson),
   courseHistory: many(courseHistory),
 }));
 
-export const topicRelations = relations(topics, ({ many }) => ({
-  lessons: many(lessonToTopic),
-  exercises: many(topicToExercise),
+export const lessonRelations = relations(lessons, ({ many }) => ({
+  topics: many(topicToLesson),
+  exercises: many(lessonToExercise),
   courseHistory: many(courseHistory),
 }));
 
 export const exerciseRelations = relations(exercises, ({ many }) => ({
-  topics: many(topicToExercise),
+  lessons: many(lessonToExercise),
   courseHistory: many(courseHistory),
 }));
 
-export const lessonToTopicRelations = relations(lessonToTopic, ({ one }) => ({
+export const topicToLessonRelations = relations(topicToLesson, ({ one }) => ({
   lesson: one(lessons, {
-    fields: [lessonToTopic.lessonId],
+    fields: [topicToLesson.lessonId],
     references: [lessons.lessonId],
   }),
   topic: one(topics, {
-    fields: [lessonToTopic.topicId],
+    fields: [topicToLesson.topicId],
     references: [topics.topicId],
   }),
 }));
 
-export const topicToExerciseRelations = relations(
-  topicToExercise,
+export const lessonToExerciseRelations = relations(
+  lessonToExercise,
   ({ one }) => ({
-    topic: one(topics, {
-      fields: [topicToExercise.topicId],
-      references: [topics.topicId],
+    lesson: one(lessons, {
+      fields: [lessonToExercise.lessonId],
+      references: [lessons.lessonId],
     }),
     exercise: one(exercises, {
-      fields: [topicToExercise.exerciseId],
+      fields: [lessonToExercise.exerciseId],
       references: [exercises.exerciseId],
     }),
   }),

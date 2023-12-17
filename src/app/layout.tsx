@@ -52,11 +52,6 @@ export default function RootLayout({
                   </a>
                 </li>
                 <li className="">
-                  <a className="hover:underline" href="/lesson">
-                    Lesson
-                  </a>
-                </li>
-                <li className="">
                   <a className="hover:underline" href="/practice">
                     Practice
                   </a>
