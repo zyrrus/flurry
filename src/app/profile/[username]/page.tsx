@@ -1,4 +1,5 @@
 import { currentUser } from "@clerk/nextjs";
+import Json from "~/app/_components/json";
 
 export default async function Profile() {
   const user = await currentUser();
@@ -6,7 +7,7 @@ export default async function Profile() {
   return (
     <main className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-bold">Profile</h1>
-      <pre>{JSON.stringify(user, undefined, 2)}</pre>
+      <Json>{user}</Json>
     </main>
   );
 }
