@@ -4,7 +4,7 @@ import type {
   topics,
   lessons,
   exercises,
-  lessonToExercise,
+  topicToLesson,
 } from "~/server/db/schema";
 
 export type SelectCourses = InferSelectModel<typeof courses>;
@@ -16,7 +16,7 @@ export type SelectCoursesWithTopics = SelectCourses & {
 export type SelectTopics = InferSelectModel<typeof topics>;
 export type InsertTopics = InferInsertModel<typeof topics>;
 export type SelectTopicsWithLessons = SelectTopics & {
-  lessons: SelectLessonToExerciseWithLesson[];
+  lessons: SelectTopicToLessonWithLesson[];
 };
 
 export type SelectLessons = InferSelectModel<typeof lessons>;
@@ -25,7 +25,7 @@ export type InsertLessons = InferInsertModel<typeof lessons>;
 export type SelectExercises = InferSelectModel<typeof exercises>;
 export type InsertExercises = InferInsertModel<typeof exercises>;
 
-export type SelectLessonToExercise = InferSelectModel<typeof lessonToExercise>;
-export type SelectLessonToExerciseWithLesson = SelectLessonToExercise & {
+export type SelectTopicToLesson = InferSelectModel<typeof topicToLesson>;
+export type SelectTopicToLessonWithLesson = SelectTopicToLesson & {
   lesson: SelectLessons;
 };
