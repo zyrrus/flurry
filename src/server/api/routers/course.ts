@@ -17,10 +17,12 @@ export const courseRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const topics = input.includeTopics ? true : undefined;
+      const includeTopics = input.includeTopics ? true : undefined;
       return await ctx.db.query.courses.findFirst({
         where: eq(courses.courseId, input.courseId),
-        with: { topics },
+        with: {
+          topics: { with: { lessons: { with: { lesson: includeTopics } } } },
+        },
       });
     }),
 });

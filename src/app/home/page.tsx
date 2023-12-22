@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { api } from "~/trpc/server";
+import LessonList from "~/app/home/lesson-list";
 
 export default async function Home() {
   const self = await api.user.getSelf();
@@ -14,17 +15,10 @@ export default async function Home() {
   return (
     <main className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-bold">Home</h1>
-      <p>Active Course:</p>
-      <pre>{JSON.stringify(activeCourse, undefined, 2)}</pre>
-      <h2 className="text-lg font-bold">Topics</h2>
-      <ol className="list-inside list-decimal">
-        {activeCourse.topics.map((topic) => (
-          <li>
-            <p className="inline">{topic.name}</p>
-            <p className="ml-5 text-sm">{topic.description}</p>
-          </li>
-        ))}
-      </ol>
+      {/* <p>Active Course:</p>
+      <Json>{activeCourse}</Json> */}
+      <h2 className="mt-8 text-lg font-bold">Topics</h2>
+      <LessonList course={activeCourse} />
     </main>
   );
 }
