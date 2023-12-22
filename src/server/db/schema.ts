@@ -49,7 +49,9 @@ export const lessons = mysqlTable("lesson", {
 
 export const exercises = mysqlTable("exercise", {
   exerciseId: serial("exercise_id").primaryKey(),
-  variant: mysqlEnum("variant", ["sentence", "phrase", "characters"]),
+  variant: mysqlEnum("variant", ["sentence", "phrase", "characters"])
+    .notNull()
+    .default("sentence"),
   targetText: varchar("target_text", { length: 255 }),
   nativeText: varchar("native_text", { length: 255 }),
   image: varchar("image", { length: 255 }),
